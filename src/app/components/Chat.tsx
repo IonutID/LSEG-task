@@ -21,7 +21,7 @@ export default function Chat() {
 				showExchangeOptions(data);
 			})
 			.catch(() => console.error("Failed to load exchanges"));
-	}, []);
+	});
 
 	useEffect(() => {
 		chatEndRef.current?.scrollIntoView({ behavior: "smooth" });

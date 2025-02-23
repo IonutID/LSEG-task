@@ -11,7 +11,7 @@ export async function loadStockData(): Promise<StockExchange[]> {
 			const jsonData = await fs.readFile(filePath, "utf-8");
 			stockData = JSON.parse(jsonData) as StockExchange[];
 		} catch (error) {
-			throw new Error("Failed to load stock data");
+			throw new Error(`Failed to load stock data with error: ${(error as Error).message}`);
 		}
 	}
 	return stockData;
