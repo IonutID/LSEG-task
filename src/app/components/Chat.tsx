@@ -1,5 +1,4 @@
-"use client";
-import { useState, useEffect, useRef, JSX } from "react";
+import { useState, useEffect, useRef, JSX, useCallback } from "react";
 import ChatInput from "./ChatInput";
 import Message from "./Message";
 import { StockExchange, Stock } from "@/types";
@@ -13,6 +12,79 @@ export default function Chat() {
 	const lastSelectedStock = useRef<Stock | null>(null);
 	const chatEndRef = useRef<HTMLDivElement>(null);
 
+	const handleGoBackRef = useRef<() => void>(() => {});
+	const handleMainMenuRef = useRef<() => void>(() => {});
+	const handleStockSelectRef = useRef<(stock: Stock) => void>(() => {});
+
+	const handleExchangeSelect = useCallback(
+		(exchange: StockExchange) => {
+			lastSelectedExchange.current = exchange;
+
+			fetch(`/api/exchange-stock?exchange=${exchange.code}`)
+				.then((res) => res.json())
+				.then((data) => {
+					setStocks(data);
+					setMessages((prev) => [
+						...prev,
+						{
+							sender: "bot",
+							text: `You selected ${exchange.stockExchange}. Please select a stock from the list below:`,
+							buttons: (
+								<div className="flex flex-col gap-1">
+									{data.map((stock: Stock) => (
+										<button
+											key={stock.code}
+											onClick={() => handleStockSelectRef.current(stock)}
+											className="bg-white border-black/[.08] text-black px-4 py-2 rounded-lg w-full"
+										>
+											{stock.stocks}
+										</button>
+									))}
+									<button onClick={handleGoBackRef.current} className="bg-white border-black/[.08] text-gray-500 px-4 py-2 rounded-lg w-full">
+										Back
+									</button>
+									<button
+										onClick={handleMainMenuRef.current}
+										className="bg-white border-black/[.08] text-red-500 px-4 py-2 rounded-lg w-full"
+									>
+										Main Menu
+									</button>
+								</div>
+							),
+						},
+					]);
+				})
+				.catch(() => console.error("Failed to load stocks"));
+		},
+		[handleMainMenuRef]
+	);
+
+	const showExchangeOptions = useCallback(
+		(exchangeList: StockExchange[]) => {
+			setMessages((prev) => [
+				...prev,
+				{
+					sender: "bot",
+					text: "Please select a stock exchange.",
+					buttons: (
+						<div className="flex flex-col gap-1">
+							{exchangeList.map((exchange) => (
+								<button
+									key={exchange.code}
+									onClick={() => handleExchangeSelect(exchange)}
+									className="bg-white border-black/[.08] text-black px-4 py-2 rounded-lg w-full"
+								>
+									{exchange.stockExchange}
+								</button>
+							))}
+						</div>
+					),
+				},
+			]);
+		},
+		[handleExchangeSelect]
+	);
+
 	useEffect(() => {
 		fetch("/api/exchanges")
 			.then((res) => res.json())
@@ -21,34 +93,11 @@ export default function Chat() {
 				showExchangeOptions(data);
 			})
 			.catch(() => console.error("Failed to load exchanges"));
-	});
+	}, [showExchangeOptions]);
 
 	useEffect(() => {
 		chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [messages]);
-
-	const showExchangeOptions = (exchangeList: StockExchange[]) => {
-		setMessages((prev) => [
-			...prev,
-			{
-				sender: "bot",
-				text: "Please select a stock exchange.",
-				buttons: (
-					<div className="flex flex-col gap-1">
-						{exchangeList.map((exchange) => (
-							<button
-								key={exchange.code}
-								onClick={() => handleExchangeSelect(exchange)}
-								className="bg-white border-black/[.08] text-black px-4 py-2 rounded-lg w-full"
-							>
-								{exchange.stockExchange}
-							</button>
-						))}
-					</div>
-				),
-			},
-		]);
-	};
 
 	const cleanInput = (input: string) =>
 		input
@@ -88,7 +137,7 @@ export default function Chat() {
 		setMessages((prev) => [...prev, { sender: "user", text: input }]);
 
 		if (cleanedInput === "back") {
-			handleGoBack();
+			handleGoBackRef.current();
 		} else if (cleanedInput === "main menu" || cleanedInput === "mainmenu" || cleanedInput === "main" || cleanedInput == "menu") {
 			handleMainMenu();
 		} else if (!lastSelectedExchange.current) {
@@ -101,7 +150,7 @@ export default function Chat() {
 		} else if (!lastSelectedStock.current) {
 			const stock = findMatchingStock(cleanedInput);
 			if (stock) {
-				handleStockSelect(stock);
+				handleStockSelectRef.current(stock);
 			} else {
 				setMessages((prev) => [...prev, { sender: "bot", text: "Invalid stock. Please type or select one of the available stock codes." }]);
 			}
@@ -110,71 +159,21 @@ export default function Chat() {
 		}
 	};
 
-	const handleExchangeSelect = (exchange: StockExchange) => {
-		lastSelectedExchange.current = exchange;
-
-		fetch(`/api/exchange-stock?exchange=${exchange.code}`)
+	const handleMainMenu = useCallback(() => {
+		setStocks([]);
+		fetch("/api/exchanges")
 			.then((res) => res.json())
 			.then((data) => {
-				setStocks(data);
-				setMessages((prev) => [
-					...prev,
-					{
-						sender: "bot",
-						text: `You selected ${exchange.stockExchange}. Please select a stock from the list below:`,
-						buttons: (
-							<div className="flex flex-col gap-1">
-								{data.map((stock: Stock) => (
-									<button
-										key={stock.code}
-										onClick={() => handleStockSelect(stock)}
-										className="bg-white border-black/[.08] text-black px-4 py-2 rounded-lg w-full"
-									>
-										{stock.stocks}
-									</button>
-								))}
-								<button onClick={handleGoBack} className="bg-white border-black/[.08] text-gray-500 px-4 py-2 rounded-lg w-full">
-									Back
-								</button>
-								<button onClick={handleMainMenu} className="bg-white border-black/[.08] text-red-500 px-4 py-2 rounded-lg w-full">
-									Main Menu
-								</button>
-							</div>
-						),
-					},
-				]);
+				setExchanges(data);
+				showExchangeOptions(data);
 			})
-			.catch(() => console.error("Failed to load stocks"));
-	};
+			.catch(() => console.error("Failed to load exchanges"));
 
-	const handleStockSelect = (stock: Stock) => {
-		lastSelectedStock.current = stock;
+		lastSelectedExchange.current = null;
+		lastSelectedStock.current = null;
+	}, [showExchangeOptions]);
 
-		fetch(`/api/stock-price?exchange=${lastSelectedExchange.current?.code}&code=${stock.code}`)
-			.then((res) => res.json())
-			.then((data) => {
-				setMessages((prev) => [
-					...prev,
-					{
-						sender: "bot",
-						text: `The price of ${stock.stocks} is $${data.price}. You can go to the main menu or go back to select another stock.`,
-						buttons: (
-							<div className="flex flex-col gap-1">
-								<button onClick={handleGoBack} className="bg-white border-black/[.08] text-gray-500 px-4 py-2 rounded-lg w-full">
-									Back
-								</button>
-								<button onClick={handleMainMenu} className="bg-white border-black/[.08] text-red-500 px-4 py-2 rounded-lg w-full">
-									Main Menu
-								</button>
-							</div>
-						),
-					},
-				]);
-			})
-			.catch(() => console.error("Failed to fetch stock price"));
-	};
-
-	const handleGoBack = () => {
+	const handleGoBack = useCallback(() => {
 		if (lastSelectedStock.current) {
 			fetch(`/api/exchange-stock?exchange=${lastSelectedExchange.current?.code}`)
 				.then((res) => res.json())
@@ -190,13 +189,13 @@ export default function Chat() {
 									{data.map((stock: Stock) => (
 										<button
 											key={stock.code}
-											onClick={() => handleStockSelect(stock)}
+											onClick={() => handleStockSelectRef.current(stock)}
 											className="bg-white border-black/[.08] text-black px-4 py-2 rounded-lg w-full"
 										>
 											{stock.stocks}
 										</button>
 									))}
-									<button onClick={handleGoBack} className="bg-white border-black/[.08] text-gray-500 px-4 py-2 rounded-lg w-full">
+									<button onClick={handleGoBackRef.current} className="bg-white border-black/[.08] text-gray-500 px-4 py-2 rounded-lg w-full">
 										Back
 									</button>
 									<button onClick={handleMainMenu} className="bg-white border-black/[.08] text-red-500 px-4 py-2 rounded-lg w-full">
@@ -219,20 +218,42 @@ export default function Chat() {
 				})
 				.catch(() => console.error("Failed to load exchanges"));
 		}
-	};
+	}, [showExchangeOptions, handleMainMenu]);
 
-	const handleMainMenu = () => {
-		setStocks([]);
-		fetch("/api/exchanges")
-			.then((res) => res.json())
-			.then((data) => {
-				setExchanges(data);
-				showExchangeOptions(data);
-			})
-			.catch(() => console.error("Failed to load exchanges"));
-		lastSelectedExchange.current = null;
-		lastSelectedStock.current = null;
-	};
+	const handleStockSelect = useCallback(
+		(stock: Stock) => {
+			lastSelectedStock.current = stock;
+
+			fetch(`/api/stock-price?exchange=${lastSelectedExchange.current?.code}&code=${stock.code}`)
+				.then((res) => res.json())
+				.then((data) => {
+					setMessages((prev) => [
+						...prev,
+						{
+							sender: "bot",
+							text: `The price of ${stock.stocks} is $${data.price}. You can go to the main menu or go back to select another stock.`,
+							buttons: (
+								<div className="flex flex-col gap-1">
+									<button onClick={handleGoBackRef.current} className="bg-white border-black/[.08] text-gray-500 px-4 py-2 rounded-lg w-full">
+										Back
+									</button>
+									<button onClick={handleMainMenu} className="bg-white border-black/[.08] text-red-500 px-4 py-2 rounded-lg w-full">
+										Main Menu
+									</button>
+								</div>
+							),
+						},
+					]);
+				})
+				.catch(() => console.error("Failed to fetch stock price"));
+		},
+		[handleMainMenu]
+	);
+
+	// Update refs with the latest function definitions
+	handleGoBackRef.current = handleGoBack;
+	handleMainMenuRef.current = handleMainMenu;
+	handleStockSelectRef.current = handleStockSelect;
 
 	return (
 		<div className="flex flex-col h-screen bg-white w-full">
