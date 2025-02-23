@@ -1,0 +1,95 @@
+[
+	{
+		"code": "LSE",
+		"stockExchange": "London Stock Exchange",
+		"stocks": [
+			{
+				"code": "CRDA",
+				"stocks": "CRODA INTERNATIONAL PLC",
+				"price": 4807.0
+			},
+			{
+				"code": "GSK",
+				"stocks": "GSK PLC",
+				"price": 1574.8
+			},
+			{
+				"code": "ANTO",
+				"stocks": "ANTOFAGASTA PLC",
+				"price": 1746.0
+			},
+			{
+				"code": "FLTR",
+				"stocks": "FLUTTER ENTERTAINMENT PLC",
+				"price": 16340.0
+			},
+			{
+				"code": "BDEV",
+				"stocks": "BARRATT DEVELOPMENTS PLC",
+				"price": 542.6
+			}
+		]
+	},
+	{
+		"code": "NYSE",
+		"stockExchange": "New York Stock Exchange",
+		"stocks": [
+			{
+				"code": "AHT",
+				"stocks": "Ashford Hospitality Trust",
+				"price": 1.72
+			},
+			{
+				"code": "KUKE",
+				"stocks": "Kuke Music Holding Ltd",
+				"price": 1.2
+			},
+			{
+				"code": "ASH",
+				"stocks": "Ashland Inc.",
+				"price": 93.42
+			},
+			{
+				"code": "NMR",
+				"stocks": "Nomura Holdings Inc.",
+				"price": 5.84
+			},
+			{
+				"code": "LC",
+				"stocks": "LendingClub Corp",
+				"price": 9.71
+			}
+		]
+	},
+	{
+		"code": "NASDAQ",
+		"stockExchange": "Nasdaq",
+		"stocks": [
+			{
+				"code": "AMD",
+				"stocks": "Advanced Micro Devices, Inc.",
+				"price": 164.21
+			},
+			{
+				"code": "TSLA",
+				"stocks": "Tesla, Inc.",
+				"price": 190.35
+			},
+			{
+				"code": "SOFI",
+				"stocks": "SoFi Technologies, Inc.",
+				"price": 8.24
+			},
+			{
+				"code": "PARA",
+				"stocks": "Paramount Global",
+				"price": 14.92
+			},
+			{
+				"code": "GOOGL",
+				"stocks": "Alphabet Inc.",
+				"price": 141.91
+			}
+		]
+	}
+]
