@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { StockExchange } from "@/types";
 
+// Storing the stock data in memory to avoid reading the file multiple times
 let stockData: StockExchange[] | null = null;
 
 export async function loadStockData(): Promise<StockExchange[]> {

@@ -16,6 +16,7 @@ export default function Chat() {
 	const handleMainMenuRef = useRef<() => void>(() => {});
 	const handleStockSelectRef = useRef<(stock: Stock) => void>(() => {});
 
+	// Function to handle the selection of an exchange and display the message with the available stocks
 	const handleExchangeSelect = useCallback(
 		(exchange: StockExchange) => {
 			lastSelectedExchange.current = exchange;
@@ -59,6 +60,7 @@ export default function Chat() {
 		[handleMainMenuRef]
 	);
 
+	// Function to display the available stock exchanges
 	const showExchangeOptions = useCallback(
 		(exchangeList: StockExchange[]) => {
 			setMessages((prev) => [
@@ -85,6 +87,7 @@ export default function Chat() {
 		[handleExchangeSelect]
 	);
 
+	// Fetch the list of exchanges when the component is mounted
 	useEffect(() => {
 		fetch("/api/exchanges")
 			.then((res) => res.json())
@@ -95,16 +98,19 @@ export default function Chat() {
 			.catch(() => console.error("Failed to load exchanges"));
 	}, [showExchangeOptions]);
 
+	// Scroll to the end of the chat when a new message is added
 	useEffect(() => {
 		chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
 	}, [messages]);
 
+	// Function to clean the user input
 	const cleanInput = (input: string) =>
 		input
 			.trim()
 			.replace(/[^\w\s]/gi, "")
 			.toLowerCase();
 
+	// Function to find the matching exchange based on the user input and return the exchange object, you can search by code, name, first word, or first two letters of the code or name
 	const findMatchingExchange = (input: string) => {
 		const cleanedInput = cleanInput(input);
 		return exchanges.find((exchange) => {
@@ -122,6 +128,7 @@ export default function Chat() {
 		});
 	};
 
+	// Function to find the matching stock based on the user input and return the stock object, you can search by code, name, first word, or part of the name
 	const findMatchingStock = (input: string) => {
 		const cleanedInput = cleanInput(input);
 		return stocks.find((stock) => {
@@ -132,6 +139,7 @@ export default function Chat() {
 		});
 	};
 
+	// Function to handle the user input and display the appropriate message based on the input and the current state
 	const handleUserInput = (input: string) => {
 		const cleanedInput = cleanInput(input);
 		setMessages((prev) => [...prev, { sender: "user", text: input }]);
@@ -159,6 +167,8 @@ export default function Chat() {
 		}
 	};
 
+	// Function to handle the main menu option and reset the state
+	// I choose to make a new request to simulate a real app where the data might change
 	const handleMainMenu = useCallback(() => {
 		setStocks([]);
 		fetch("/api/exchanges")
@@ -173,6 +183,8 @@ export default function Chat() {
 		lastSelectedStock.current = null;
 	}, [showExchangeOptions]);
 
+	// Function to handle the go back option and reset the state
+	// I choose to make a new request to simulate a real app where the data might change
 	const handleGoBack = useCallback(() => {
 		if (lastSelectedStock.current) {
 			fetch(`/api/exchange-stock?exchange=${lastSelectedExchange.current?.code}`)
@@ -220,6 +232,8 @@ export default function Chat() {
 		}
 	}, [showExchangeOptions, handleMainMenu]);
 
+	// Function to handle the selection of a stock and display the message with the stock price
+	// I choose to make a new request to simulate a real app where the data might change even though I aleardy got the price when i got all the stocks
 	const handleStockSelect = useCallback(
 		(stock: Stock) => {
 			lastSelectedStock.current = stock;

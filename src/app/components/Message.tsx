@@ -9,6 +9,7 @@ interface MessageProps {
 
 export default function Message({ sender, text, buttons }: MessageProps) {
 	return (
+		// displying the message and the icon for the robot. The message can contain buttons in order to select the next action
 		<div className={`flex ${sender === "user" ? "justify-end" : "justify-start"} items-end w-max-[200px] mb-2 gap-2`}>
 			{sender === "bot" && (
 				<div className="w-10 h-10 flex items-center justify-center bg-[#e9f6ff] rounded-full">

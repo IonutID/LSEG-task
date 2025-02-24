@@ -8,6 +8,7 @@ interface Props {
 export default function ChatInput({ onSendMessage }: Props) {
 	const [input, setInput] = useState("");
 
+	// triming the input and checking if it is not empty before sending the message
 	const handleSend = () => {
 		if (input.trim() !== "") {
 			onSendMessage(input);
