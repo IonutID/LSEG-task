@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { loadStockData } from "@/lib/loadStockData";
 import { StockExchange } from "@/types";
 
+// Function to get the stock price for a given stock code and exchange
 export async function GET(req: Request) {
 	const { searchParams } = new URL(req.url);
 	const exchangeCode = searchParams.get("exchange");

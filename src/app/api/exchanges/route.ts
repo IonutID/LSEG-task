@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { StockExchange } from "@/types";
 import { loadStockData } from "@/lib/loadStockData";
 
+// Function to get the list of stock exchanges
 export async function GET() {
 	try {
 		const data: StockExchange[] = await loadStockData();
